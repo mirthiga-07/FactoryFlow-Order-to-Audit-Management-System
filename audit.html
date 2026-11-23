@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactoryFlow - Audit & Reports</title>
+
+<script src="auth.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#243447}
+.sidebar{width:245px;height:100vh;position:fixed;background:#183b56;color:white;padding:25px 18px}
+.sidebar h2{margin:0 0 10px}
+.sidebar p{font-size:12px;margin-bottom:30px;color:#cbd5e1}
+.sidebar a{display:block;color:#dce6ed;text-decoration:none;padding:12px;margin:5px 0;border-radius:7px}
+.sidebar a:hover,.sidebar a.active{background:#2d5876;color:white}
+.main{margin-left:245px;padding:30px}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:15px}
+.user{background:white;padding:10px 16px;border-radius:8px;font-size:14px}
+.subtitle{color:#718096;margin-bottom:25px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:25px}
+.card,.panel{background:white;padding:22px;border-radius:12px;box-shadow:0 3px 12px #0000000b}
+.card h3{font-size:14px;color:#718096;margin:0 0 12px}
+.card p{font-size:25px;font-weight:bold;margin:0;color:#183b56}
+.panel{margin-bottom:25px}
+.panel h2{margin-top:0;font-size:19px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #e5eaf0;font-size:13px}
+th{background:#f7f9fb;color:#526477}
+.table-wrap{overflow-x:auto}
+button{border:0;padding:11px 17px;border-radius:7px;cursor:pointer;font-weight:bold;background:#183b56;color:white;margin:5px 5px 5px 0}
+.note{color:#718096;font-size:13px;line-height:1.6}
+@media(max-width:850px){
+.sidebar{width:190px}.main{margin-left:190px;padding:18px}
+.cards{grid-template-columns:1fr}
+}
+@media print{
+.sidebar,.no-print,.topbar{display:none!important}
+.main{margin:0;padding:10px}
+body{background:white}
+.card,.panel{box-shadow:none;border:1px solid #ddd}
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+<div class="brand">
+    <h2>🏭 FactoryFlow</h2>
+    <p>Manufacturing Management System</p>
+</div>
+
+<a href="index.html">🏠 Dashboard</a>
+<a href="orders.html">📋 Order Management</a>
+<a href="production.html">🏭 Production</a>
+<a href="inventory.html">📦 Inventory</a>
+<a href="billing.html">🧾 GST Billing</a>
+<a href="costing.html">💰 Cost Management</a>
+<a href="quality.html">🔍 Quality Control</a>
+<a class="active" href="audit.html">📊 Audit & Reports</a>
+</aside>
+
+<main class="main">
+
+<div class="topbar">
+    <div class="user">👤 <span id="userRole">Administrator</span></div>
+</div>
+
+<h1>Audit & Reports</h1>
+<p class="subtitle">Review manufacturing records and generate a basic operational summary.</p>
+
+<div class="no-print">
+<button onclick="loadReport()">Refresh Report</button>
+<button onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<section class="cards">
+
+<div class="card">
+<h3>Total Customer Orders</h3>
+<p id="orders">0</p>
+</div>
+
+<div class="card">
+<h3>Production Batches</h3>
+<p id="production">0</p>
+</div>
+
+<div class="card">
+<h3>Inventory Records</h3>
+<p id="inventory">0</p>
+</div>
+
+<div class="card">
+<h3>Invoices Generated</h3>
+<p id="billing">0</p>
+</div>
+
+<div class="card">
+<h3>Cost Records</h3>
+<p id="costing">0</p>
+</div>
+
+<div class="card">
+<h3>Quality Inspections</h3>
+<p id="quality">0</p>
+</div>
+
+</section>
+
+<section class="panel">
+<h2>Operational Summary</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Total Records</th>
+<th>Module Status</th>
+</tr>
+</thead>
+<tbody id="summaryTable"></tbody>
+</table>
+</div>
+</section>
+
+<section class="panel">
+<h2>Inventory Alerts</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Available Quantity</th>
+<th>Minimum Stock</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="inventoryTable"></tbody>
+</table>
+</div>
+</section>
+
+<section class="panel">
+<h2>Quality Inspection Summary</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Product</th>
+<th>Inspector</th>
+<th>Inspection Date</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody id="qualityTable"></tbody>
+</table>
+</div>
+</section>
+
+<section class="panel">
+<h2>Audit Notes</h2>
+
+<p class="note">
+This report summarizes the records stored locally in this browser. It is intended
+for prototype demonstration and internal review. It does not constitute a
+statutory audit, certified accounting report, or GST compliance verification.
+</p>
+
+<p class="note" id="reportDate"></p>
+</section>
+
+</main>
+
+<script>
+
+// ROLE-BASED ACCESS
+
+if (!checkAccess()) {
+    throw new Error("Access denied");
+}
+
+const currentUser = getCurrentUser();
+
+if (currentUser) {
+    document.getElementById("userRole").textContent = currentUser.role;
+}
+
+applyRoleMenu();
+
+
+// READ LOCAL STORAGE RECORDS
+
+function readRecords(key) {
+    try {
+        const data = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(data) ? data : [];
+    } catch(error) {
+        return [];
+    }
+}
+
+
+// LOAD AUDIT REPORT
+
+function loadReport() {
+
+    const orders = readRecords("factoryflowOrders");
+    const production = readRecords("factoryflowProduction");
+    const inventory = readRecords("factoryflowInventory");
+    const billing = readRecords("factoryflowBilling");
+    const costing = readRecords("factoryflowCosting");
+    const quality = readRecords("factoryflowQuality");
+
+
+    // SUMMARY CARDS
+
+    document.getElementById("orders").textContent = orders.length;
+    document.getElementById("production").textContent = production.length;
+    document.getElementById("inventory").textContent = inventory.length;
+    document.getElementById("billing").textContent = billing.length;
+    document.getElementById("costing").textContent = costing.length;
+    document.getElementById("quality").textContent = quality.length;
+
+
+    // OPERATIONAL SUMMARY TABLE
+
+    const modules = [
+        ["Order Management", orders.length],
+        ["Production Management", production.length],
+        ["Inventory Management", inventory.length],
+        ["GST Billing", billing.length],
+        ["Cost Management", costing.length],
+        ["Quality Control", quality.length]
+    ];
+
+    const summary = document.getElementById("summaryTable");
+    summary.innerHTML = "";
+
+    modules.forEach(([name, count]) => {
+
+        const row = document.createElement("tr");
+
+        [
+            name,
+            count,
+            count > 0 ? "Records Available" : "No Records"
+        ].forEach(value => {
+
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+
+        });
+
+        summary.appendChild(row);
+
+    });
+
+
+    // INVENTORY ALERTS
+
+    const inventoryTable = document.getElementById("inventoryTable");
+    inventoryTable.innerHTML = "";
+
+    if (inventory.length === 0) {
+
+        inventoryTable.innerHTML =
+            '<tr><td colspan="4">No inventory records available.</td></tr>';
+
+    } else {
+
+        inventory.forEach(item => {
+
+            const quantity = Number(item.quantity) || 0;
+            const minimum = Number(item.minimumStock) || 0;
+
+            const status =
+                quantity === 0
+                ? "Out of Stock"
+                : quantity <= minimum
+                ? "Low Stock"
+                : "Available";
+
+            const row = document.createElement("tr");
+
+            [
+                item.name || item.itemName || "Unnamed Item",
+                quantity + " kg",
+                minimum + " kg",
+                status
+            ].forEach(value => {
+
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+
+            });
+
+            inventoryTable.appendChild(row);
+
+        });
+
+    }
+
+
+    // QUALITY INSPECTION SUMMARY
+
+    const qualityTable = document.getElementById("qualityTable");
+    qualityTable.innerHTML = "";
+
+    if (quality.length === 0) {
+
+        qualityTable.innerHTML =
+            '<tr><td colspan="5">No quality inspections available.</td></tr>';
+
+    } else {
+
+        quality.forEach(item => {
+
+            const row = document.createElement("tr");
+
+            [
+                item.batch,
+                item.product,
+                item.inspector,
+                item.date,
+                item.result
+            ].forEach(value => {
+
+                const cell = document.createElement("td");
+                cell.textContent = value || "-";
+                row.appendChild(cell);
+
+            });
+
+            qualityTable.appendChild(row);
+
+        });
+
+    }
+
+
+    // REPORT DATE
+
+    document.getElementById("reportDate").textContent =
+        "Report generated on: " + new Date().toLocaleString("en-IN");
+
+}
+
+
+// INITIAL REPORT LOAD
+
+loadReport();
+
+</script>
+
+</body>
+</html>

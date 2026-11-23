@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactoryFlow - Quality Control</title>
+
+<script src="auth.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#243447}
+.sidebar{width:245px;height:100vh;position:fixed;background:#183b56;color:white;padding:25px 18px}
+.sidebar h2{margin:0 0 10px}
+.sidebar p{font-size:12px;margin-bottom:30px;color:#cbd5e1}
+.sidebar a{display:block;color:#dce6ed;text-decoration:none;padding:12px;margin:5px 0;border-radius:7px}
+.sidebar a:hover,.sidebar a.active{background:#2d5876;color:white}
+.main{margin-left:245px;padding:30px}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:15px}
+.user{background:white;padding:10px 16px;border-radius:8px;font-size:14px}
+.subtitle{color:#718096;margin-bottom:25px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:25px}
+.card,.panel{background:white;padding:22px;border-radius:12px;box-shadow:0 3px 12px #0000000b}
+.card h3{font-size:14px;color:#718096;margin:0 0 12px}
+.card p{font-size:25px;font-weight:bold;margin:0;color:#183b56}
+.panel{margin-bottom:25px}
+.panel h2{margin-top:0;font-size:19px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+label{display:block;font-weight:bold;font-size:13px;margin-bottom:7px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd6df;border-radius:7px;font-size:14px;font-family:Arial}
+textarea{resize:vertical;min-height:75px}
+button{border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:bold}
+.primary{background:#183b56;color:white;margin-top:18px}
+.danger{background:#fee2e2;color:#991b1b}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #e5eaf0;font-size:13px}
+th{background:#f7f9fb;color:#526477}
+.status{font-weight:bold}
+@media(max-width:850px){
+.sidebar{width:190px}.main{margin-left:190px;padding:18px}
+.cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+<div class="brand">
+    <h2>🏭 FactoryFlow</h2>
+    <p>Manufacturing Management System</p>
+</div>
+
+<a href="index.html">🏠 Dashboard</a>
+<a href="orders.html">📋 Order Management</a>
+<a href="production.html">🏭 Production</a>
+<a href="inventory.html">📦 Inventory</a>
+<a href="billing.html">🧾 GST Billing</a>
+<a href="costing.html">💰 Cost Management</a>
+<a class="active" href="quality.html">🔍 Quality Control</a>
+<a href="audit.html">📊 Audit & Reports</a>
+</aside>
+
+<main class="main">
+
+<div class="topbar">
+    <div class="user">👤 <span id="userRole">Administrator</span></div>
+</div>
+
+<h1>Quality Control</h1>
+<p class="subtitle">Record food product inspections and monitor manufacturing quality.</p>
+
+<section class="cards">
+
+<div class="card">
+<h3>Total Inspections</h3>
+<p id="total">0</p>
+</div>
+
+<div class="card">
+<h3>Passed Inspections</h3>
+<p id="passed">0</p>
+</div>
+
+<div class="card">
+<h3>Failed Inspections</h3>
+<p id="failed">0</p>
+</div>
+
+</section>
+
+<section class="panel">
+<h2>Record Quality Inspection</h2>
+
+<form id="qualityForm">
+
+<div class="form-grid">
+
+<div>
+<label>Batch Reference</label>
+<input id="batch" placeholder="Example: BAT1001" required>
+</div>
+
+<div>
+<label>Product Name</label>
+<select id="product" required>
+<option value="">Select Product</option>
+<option>Mixture</option>
+<option>Murukku</option>
+<option>Banana Chips</option>
+<option>Potato Chips</option>
+<option>Ribbon Pakoda</option>
+<option>Groundnut Candy</option>
+</select>
+</div>
+
+<div>
+<label>Inspection Date</label>
+<input id="date" type="date" required>
+</div>
+
+<div>
+<label>Inspector Name</label>
+<input id="inspector" placeholder="Enter inspector name" required>
+</div>
+
+<div>
+<label>Appearance</label>
+<select id="appearance" required>
+<option value="">Select result</option>
+<option>Good</option>
+<option>Average</option>
+<option>Poor</option>
+</select>
+</div>
+
+<div>
+<label>Packaging Condition</label>
+<select id="packaging" required>
+<option value="">Select condition</option>
+<option>Good</option>
+<option>Damaged</option>
+</select>
+</div>
+
+<div>
+<label>Taste / Product Quality</label>
+<select id="taste" required>
+<option value="">Select result</option>
+<option>Good</option>
+<option>Average</option>
+<option>Poor</option>
+</select>
+</div>
+
+<div>
+<label>Inspection Result</label>
+<select id="result" required>
+<option value="">Select result</option>
+<option>Passed</option>
+<option>Failed</option>
+</select>
+</div>
+
+<div style="grid-column:1/-1">
+<label>Inspection Remarks</label>
+<textarea id="remarks" placeholder="Enter inspection observations"></textarea>
+</div>
+
+</div>
+
+<button class="primary" type="submit">Save Inspection</button>
+
+</form>
+</section>
+
+<section class="panel">
+<h2>Quality Inspection Records</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Inspection ID</th>
+<th>Batch</th>
+<th>Product</th>
+<th>Inspector</th>
+<th>Date</th>
+<th>Result</th>
+<th>Remarks</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="qualityTable"></tbody>
+</table>
+</div>
+</section>
+
+</main>
+
+<script>
+if (!checkAccess()) {
+    throw new Error("Access denied");
+}
+
+const currentUser = getCurrentUser();
+
+if (currentUser) {
+    document.getElementById("userRole").textContent = currentUser.role;
+}
+
+applyRoleMenu();
+
+const KEY = "factoryflowQuality";
+
+let inspections = [];
+
+try {
+    inspections = JSON.parse(localStorage.getItem(KEY) || "[]");
+    if (!Array.isArray(inspections)) inspections = [];
+} catch (error) {
+    inspections = [];
+}
+
+document.getElementById("date").valueAsDate = new Date();
+
+document.getElementById("qualityForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const inspection = {
+        id: "QC" + Date.now().toString().slice(-7),
+        batch: document.getElementById("batch").value.trim(),
+        product: document.getElementById("product").value,
+        date: document.getElementById("date").value,
+        inspector: document.getElementById("inspector").value.trim(),
+        appearance: document.getElementById("appearance").value,
+        packaging: document.getElementById("packaging").value,
+        taste: document.getElementById("taste").value,
+        result: document.getElementById("result").value,
+        remarks: document.getElementById("remarks").value.trim()
+    };
+
+    inspections.push(inspection);
+
+    saveData();
+
+    this.reset();
+    document.getElementById("date").valueAsDate = new Date();
+
+    alert("Quality inspection saved successfully.");
+});
+
+function saveData() {
+    localStorage.setItem(KEY, JSON.stringify(inspections));
+    render();
+}
+
+function render() {
+    document.getElementById("total").textContent = inspections.length;
+
+    document.getElementById("passed").textContent =
+        inspections.filter(x => x.result === "Passed").length;
+
+    document.getElementById("failed").textContent =
+        inspections.filter(x => x.result === "Failed").length;
+
+    const table = document.getElementById("qualityTable");
+    table.innerHTML = "";
+
+    if (inspections.length === 0) {
+        table.innerHTML = '<tr><td colspan="8">No inspection records available.</td></tr>';
+        return;
+    }
+
+    inspections.forEach(item => {
+        const row = document.createElement("tr");
+
+        const values = [
+            item.id,
+            item.batch,
+            item.product,
+            item.inspector,
+            item.date,
+            item.result,
+            item.remarks || "-"
+        ];
+
+        values.forEach((value, index) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+
+            if (index === 5) {
+                cell.className = "status";
+                cell.style.color = value === "Passed" ? "#15803d" : "#dc2626";
+            }
+
+            row.appendChild(cell);
+        });
+
+        const action = document.createElement("td");
+
+        const btn = document.createElement("button");
+        btn.textContent = "Delete";
+        btn.className = "danger";
+
+        btn.onclick = () => {
+            if (confirm("Delete this inspection record?")) {
+                inspections = inspections.filter(x => x.id !== item.id);
+                saveData();
+            }
+        };
+
+        action.appendChild(btn);
+        row.appendChild(action);
+        table.appendChild(row);
+    });
+}
+
+render();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactoryFlow - Cost Management</title>
+
+<script src="auth.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#243447}
+.sidebar{width:245px;height:100vh;position:fixed;background:#183b56;color:white;padding:25px 18px}
+.sidebar h2{margin:0 0 10px}
+.sidebar p{font-size:12px;margin-bottom:30px;color:#cbd5e1}
+.sidebar a{display:block;color:#dce6ed;text-decoration:none;padding:12px;margin:5px 0;border-radius:7px}
+.sidebar a:hover,.sidebar a.active{background:#2d5876;color:white}
+.main{margin-left:245px;padding:30px}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:15px}
+.user{background:white;padding:10px 16px;border-radius:8px;font-size:14px}
+h1{margin-top:0}
+.subtitle{color:#718096;margin-bottom:25px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:25px}
+.card,.panel{background:white;padding:22px;border-radius:12px;box-shadow:0 3px 12px #0000000b}
+.card h3{font-size:14px;color:#718096;margin:0 0 12px}
+.card p{font-size:25px;font-weight:bold;margin:0;color:#183b56}
+.panel{margin-bottom:25px}
+.panel h2{margin-top:0;font-size:19px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+label{display:block;font-weight:bold;font-size:13px;margin-bottom:7px}
+input,select{width:100%;padding:11px;border:1px solid #ccd6df;border-radius:7px;font-size:14px}
+button{border:0;padding:10px 16px;border-radius:7px;cursor:pointer;font-weight:bold}
+.primary{background:#183b56;color:white;margin-top:18px}
+.danger{background:#fee2e2;color:#991b1b}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #e5eaf0;font-size:13px}
+th{background:#f7f9fb;color:#526477}
+.table-wrap{overflow-x:auto}
+.result{margin-top:16px;padding:15px;background:#edf4f8;border-radius:8px;color:#183b56;font-weight:bold}
+@media(max-width:850px){
+.sidebar{width:190px}.main{margin-left:190px;padding:18px}
+.cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+<div class="brand">
+    <h2>🏭 FactoryFlow</h2>
+    <p>Manufacturing Management System</p>
+</div>
+
+<a href="index.html">🏠 Dashboard</a>
+<a href="orders.html">📋 Order Management</a>
+<a href="production.html">🏭 Production</a>
+<a href="inventory.html">📦 Inventory</a>
+<a href="billing.html">🧾 GST Billing</a>
+<a class="active" href="costing.html">💰 Cost Management</a>
+<a href="quality.html">🔍 Quality Control</a>
+<a href="audit.html">📊 Audit & Reports</a>
+</aside>
+
+<main class="main">
+
+<div class="topbar">
+    <div class="user">👤 <span id="userRole">Administrator</span></div>
+</div>
+
+<h1>Cost Management</h1>
+<p class="subtitle">Calculate and monitor the manufacturing cost of each production batch.</p>
+
+<section class="cards">
+<div class="card">
+<h3>Total Cost Records</h3>
+<p id="recordCount">0</p>
+</div>
+
+<div class="card">
+<h3>Total Production Cost</h3>
+<p id="totalCost">₹0.00</p>
+</div>
+
+<div class="card">
+<h3>Average Cost Per kg</h3>
+<p id="averageCost">₹0.00</p>
+</div>
+</section>
+
+<section class="panel">
+<h2>Add Production Cost</h2>
+
+<form id="costForm">
+
+<div class="form-grid">
+
+<div>
+<label>Product Name</label>
+<select id="product" required>
+<option value="">Select Product</option>
+<option>Mixture</option>
+<option>Murukku</option>
+<option>Banana Chips</option>
+<option>Potato Chips</option>
+<option>Ribbon Pakoda</option>
+<option>Groundnut Candy</option>
+</select>
+</div>
+
+<div>
+<label>Batch Reference</label>
+<input id="batch" type="text" placeholder="Example: BAT1001" required>
+</div>
+
+<div>
+<label>Raw Material Cost (₹)</label>
+<input id="raw" type="number" min="0" step="0.01" required>
+</div>
+
+<div>
+<label>Labour Cost (₹)</label>
+<input id="labour" type="number" min="0" step="0.01" required>
+</div>
+
+<div>
+<label>Packaging Cost (₹)</label>
+<input id="packaging" type="number" min="0" step="0.01" required>
+</div>
+
+<div>
+<label>Other Overhead Cost (₹)</label>
+<input id="overhead" type="number" min="0" step="0.01" required>
+</div>
+
+<div>
+<label>Production Output (kg)</label>
+<input id="output" type="number" min="0.01" step="0.01" required>
+</div>
+
+<div>
+<label>Costing Date</label>
+<input id="date" type="date" required>
+</div>
+
+</div>
+
+<div id="calculation" class="result">
+Enter the costs and production output to calculate the total cost.
+</div>
+
+<button type="submit" class="primary">Save Cost Record</button>
+
+</form>
+</section>
+
+<section class="panel">
+<h2>Production Cost Records</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Batch ID</th>
+<th>Product</th>
+<th>Total Cost</th>
+<th>Output (kg)</th>
+<th>Cost / kg</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="costTable"></tbody>
+</table>
+</div>
+</section>
+
+</main>
+
+<script>
+if (!checkAccess()) {
+    throw new Error("Access denied");
+}
+
+const currentUser = getCurrentUser();
+
+if (currentUser) {
+    document.getElementById("userRole").textContent = currentUser.role;
+}
+
+applyRoleMenu();
+
+const STORAGE_KEY = "factoryflowCosting";
+
+let records = [];
+
+try {
+    records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (!Array.isArray(records)) records = [];
+} catch (error) {
+    records = [];
+}
+
+const money = value => "₹" + Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+const fields = ["raw", "labour", "packaging", "overhead", "output"];
+
+const calculation = document.getElementById("calculation");
+
+function calculatePreview() {
+    const values = {};
+
+    fields.forEach(id => {
+        values[id] = Number(document.getElementById(id).value) || 0;
+    });
+
+    const total = values.raw + values.labour + values.packaging + values.overhead;
+
+    if (values.output > 0) {
+        calculation.textContent =
+            "Total Production Cost: " + money(total) +
+            " | Cost Per kg: " + money(total / values.output);
+    } else {
+        calculation.textContent =
+            "Enter a production output greater than zero to calculate cost per kg.";
+    }
+}
+
+fields.forEach(id => {
+    document.getElementById(id).addEventListener("input", calculatePreview);
+});
+
+document.getElementById("date").valueAsDate = new Date();
+
+document.getElementById("costForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const raw = Number(document.getElementById("raw").value);
+    const labour = Number(document.getElementById("labour").value);
+    const packaging = Number(document.getElementById("packaging").value);
+    const overhead = Number(document.getElementById("overhead").value);
+    const output = Number(document.getElementById("output").value);
+
+    if (
+        [raw, labour, packaging, overhead, output].some(
+            value => !Number.isFinite(value) || value < 0
+        ) || output <= 0
+    ) {
+        alert("Enter valid non-negative costs and a production output greater than zero.");
+        return;
+    }
+
+    const total = raw + labour + packaging + overhead;
+
+    const record = {
+        id: "CST" + Date.now().toString().slice(-7),
+        product: document.getElementById("product").value,
+        batch: document.getElementById("batch").value.trim(),
+        raw,
+        labour,
+        packaging,
+        overhead,
+        output,
+        total,
+        perKg: total / output,
+        date: document.getElementById("date").value
+    };
+
+    records.push(record);
+
+    saveRecords();
+
+    this.reset();
+    document.getElementById("date").valueAsDate = new Date();
+
+    calculatePreview();
+
+    alert("Production cost record saved successfully.");
+});
+
+function saveRecords() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    renderRecords();
+}
+
+function renderRecords() {
+    document.getElementById("recordCount").textContent = records.length;
+
+    const totalCost = records.reduce((sum, record) => sum + Number(record.total || 0), 0);
+    const totalOutput = records.reduce((sum, record) => sum + Number(record.output || 0), 0);
+
+    document.getElementById("totalCost").textContent = money(totalCost);
+
+    document.getElementById("averageCost").textContent =
+        money(totalOutput ? totalCost / totalOutput : 0);
+
+    const table = document.getElementById("costTable");
+    table.innerHTML = "";
+
+    if (records.length === 0) {
+        table.innerHTML = '<tr><td colspan="7">No cost records available.</td></tr>';
+        return;
+    }
+
+    records.forEach(record => {
+        const row = document.createElement("tr");
+
+        const values = [
+            record.id,
+            record.product,
+            money(record.total),
+            Number(record.output).toFixed(2),
+            money(record.perKg),
+            record.date
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const actionCell = document.createElement("td");
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "danger";
+
+        deleteButton.addEventListener("click", () => {
+            if (confirm("Delete this cost record?")) {
+                records = records.filter(item => item.id !== record.id);
+                saveRecords();
+            }
+        });
+
+        actionCell.appendChild(deleteButton);
+        row.appendChild(actionCell);
+        table.appendChild(row);
+    });
+}
+
+renderRecords();
+</script>
+
+</body>
+</html>

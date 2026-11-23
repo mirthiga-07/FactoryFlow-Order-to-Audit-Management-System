@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactoryFlow | Production Management</title>
+
+<script src="auth.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    color: #263238;
+}
+
+.sidebar {
+    width: 245px;
+    height: 100vh;
+    background: #183b56;
+    color: white;
+    position: fixed;
+    padding: 25px 18px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 35px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 13px;
+    margin-bottom: 6px;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: #2e5d7d;
+}
+
+.main {
+    margin-left: 245px;
+    padding: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.header h1 {
+    color: #183b56;
+}
+
+.user {
+    background: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    border-left: 4px solid #356b8e;
+}
+
+.card p {
+    color: #718096;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.card h2 {
+    color: #183b56;
+    font-size: 25px;
+}
+
+.panel {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+}
+
+.panel h2 {
+    color: #183b56;
+    margin-bottom: 20px;
+    font-size: 19px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+.field input:focus,
+.field select:focus {
+    outline: none;
+    border-color: #356b8e;
+}
+
+.btn {
+    background: #183b56;
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.btn:hover {
+    background: #2e5d7d;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #edf0f3;
+    font-size: 13px;
+}
+
+th {
+    background: #f4f6f9;
+    color: #526579;
+}
+
+.status {
+    padding: 6px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    background: #e8f4ed;
+    color: #287548;
+}
+
+.status.planned {
+    background: #fff2d9;
+    color: #a66a00;
+}
+
+.status.cancelled {
+    background: #fde8e8;
+    color: #b42318;
+}
+
+.action {
+    border: none;
+    padding: 7px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.delete {
+    background: #fde8e8;
+    color: #b42318;
+}
+
+.update {
+    background: #e5eff8;
+    color: #183b56;
+}
+
+.empty {
+    text-align: center;
+    padding: 25px;
+    color: #8492a6;
+}
+
+@media(max-width: 800px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 18px;
+    }
+
+    .summary,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">🏭 FactoryFlow</div>
+    <div class="subtitle">Manufacturing Management System</div>
+
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="orders.html">📦 Order Management</a>
+    <a href="production.html" class="active">⚙️ Production</a>
+    <a href="inventory.html">🧾 Inventory</a>
+    <a href="billing.html">💳 GST Billing</a>
+    <a href="costing.html">💰 Cost Management</a>
+    <a href="quality.html">✅ Quality Control</a>
+    <a href="audit.html">📊 Audit & Reports</a>
+
+</aside>
+
+<main class="main">
+
+    <div class="header">
+        <h1>Production Management</h1>
+        <div class="user">👤 <span id="userRole">Administrator</span></div>
+    </div>
+
+    <section class="summary">
+
+        <div class="card">
+            <p>Total Production Batches</p>
+            <h2 id="totalBatches">0</h2>
+        </div>
+
+        <div class="card">
+            <p>Completed Batches</p>
+            <h2 id="completedBatches">0</h2>
+        </div>
+
+        <div class="card">
+            <p>Ongoing Batches</p>
+            <h2 id="ongoingBatches">0</h2>
+        </div>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>➕ Create Production Batch</h2>
+
+        <form id="productionForm">
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Product Name</label>
+                    <select id="product" required>
+                        <option value="">Select Product</option>
+                        <option value="Mixture">Mixture</option>
+                        <option value="Murukku">Murukku</option>
+                        <option value="Banana Chips">Banana Chips</option>
+                        <option value="Potato Chips">Potato Chips</option>
+                        <option value="Ribbon Pakoda">Ribbon Pakoda</option>
+                        <option value="Groundnut Candy">Groundnut Candy</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Raw Material Used</label>
+                    <select id="rawMaterial" required>
+                        <option value="">Loading raw materials...</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Raw Material Quantity (kg)</label>
+                    <input type="number" id="rawQuantity"
+                    min="0.01" step="0.01"
+                    placeholder="Enter quantity" required>
+                </div>
+
+                <div class="field">
+                    <label>Production Quantity (kg)</label>
+                    <input type="number" id="productionQuantity"
+                    min="0.01" step="0.01"
+                    placeholder="Enter output quantity" required>
+                </div>
+
+                <div class="field">
+                    <label>Manufacturing Date</label>
+                    <input type="date" id="manufacturingDate" required>
+                </div>
+
+                <div class="field">
+                    <label>Batch Status</label>
+                    <select id="batchStatus">
+                        <option value="Planned">Planned</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn">Save Production Batch</button>
+
+        </form>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>📋 Production Records</h2>
+
+        <div class="table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Product</th>
+                        <th>Raw Material</th>
+                        <th>Raw Material Qty</th>
+                        <th>Production Qty</th>
+                        <th>Manufacturing Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="productionTable">
+                    <tr>
+                        <td colspan="8" class="empty">
+                            No production batches added yet.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+// CHECK LOGIN AND ROLE ACCESS
+if (!checkAccess()) {
+    throw new Error("Access denied");
+}
+
+const currentUser = getCurrentUser();
+
+if (currentUser) {
+    document.getElementById("userRole").textContent = currentUser.role;
+}
+
+applyRoleMenu();
+
+// PRODUCTION MANAGEMENT
+const STORAGE_KEY = "factoryflowProduction";
+
+let batches = [];
+
+try {
+    batches = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    if (!Array.isArray(batches)) batches = [];
+} catch (error) {
+    batches = [];
+    console.error("Could not read production records:", error);
+}
+
+function saveBatches() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
+}
+
+// Read Inventory records
+function getInventory() {
+    try {
+        const records = JSON.parse(
+            localStorage.getItem("factoryflowInventory")
+        ) || [];
+
+        return Array.isArray(records) ? records : [];
+
+    } catch (error) {
+        console.error("Could not read Inventory records:", error);
+        return [];
+    }
+}
+
+// Load raw materials from Inventory
+function loadRawMaterials() {
+
+    const dropdown = document.getElementById("rawMaterial");
+    const inventory = getInventory();
+
+    const rawMaterials = inventory.filter(item =>
+        String(item.category || "").trim().toLowerCase() === "raw material"
+    );
+
+    dropdown.innerHTML =
+        '<option value="">Select Raw Material</option>';
+
+    if (rawMaterials.length === 0) {
+
+        dropdown.innerHTML +=
+            '<option value="" disabled>No raw materials found — add items in Inventory</option>';
+
+        return;
+    }
+
+    rawMaterials.forEach(item => {
+
+        const option = document.createElement("option");
+
+        option.value = item.name;
+
+        option.textContent =
+            item.name + " (" +
+            Number(item.quantity || 0).toFixed(2) +
+            " kg available)";
+
+        dropdown.appendChild(option);
+
+    });
+}
+
+// Update Inventory when production is completed
+function updateInventory(batch) {
+
+    if (batch.inventoryUpdated) {
+        return true;
+    }
+
+    const inventory = getInventory();
+
+    const rawItem = inventory.find(item =>
+        String(item.category || "").trim().toLowerCase() === "raw material" &&
+        String(item.name || "").trim().toLowerCase() ===
+        String(batch.rawMaterial || "").trim().toLowerCase()
+    );
+
+    if (!rawItem) {
+
+        alert("Raw material not found in Inventory. Please check the Inventory page.");
+
+        loadRawMaterials();
+
+        return false;
+    }
+
+    const rawQuantity = Number(batch.rawQuantity);
+    const outputQuantity = Number(batch.productionQuantity);
+
+    if (Number(rawItem.quantity) < rawQuantity) {
+
+        alert(
+            "Insufficient " + rawItem.name +
+            " stock. Available: " +
+            Number(rawItem.quantity).toFixed(2) + " kg."
+        );
+
+        return false;
+    }
+
+    // Deduct raw material
+    rawItem.quantity =
+        Number(rawItem.quantity) - rawQuantity;
+
+    // Find or create finished product
+    let finishedItem = inventory.find(item =>
+        String(item.category || "").trim().toLowerCase() !== "raw material" &&
+        String(item.name || "").trim().toLowerCase() ===
+        String(batch.product || "").trim().toLowerCase()
+    );
+
+    if (finishedItem) {
+
+        finishedItem.quantity =
+            Number(finishedItem.quantity || 0) + outputQuantity;
+
+    } else {
+
+        inventory.push({
+            id: "INV" + Date.now().toString().slice(-7),
+            name: batch.product,
+            category: "Finished Product",
+            quantity: outputQuantity,
+            minimumStock: 0
+        });
+
+    }
+
+    try {
+
+        localStorage.setItem(
+            "factoryflowInventory",
+            JSON.stringify(inventory)
+        );
+
+    } catch (error) {
+
+        alert("Inventory could not be saved. Please check browser storage.");
+
+        return false;
+    }
+
+    batch.inventoryUpdated = true;
+
+    loadRawMaterials();
+
+    return true;
+}
+
+// Update summary cards
+function updateDashboard() {
+
+    document.getElementById("totalBatches").textContent =
+        batches.length;
+
+    document.getElementById("completedBatches").textContent =
+        batches.filter(batch => batch.status === "Completed").length;
+
+    document.getElementById("ongoingBatches").textContent =
+        batches.filter(batch => batch.status === "Ongoing").length;
+
+}
+
+// Display production records
+function renderBatches() {
+
+    const table = document.getElementById("productionTable");
+
+    table.innerHTML = "";
+
+    if (batches.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty">
+                    No production batches added yet.
+                </td>
+            </tr>`;
+
+    }
+
+    batches.forEach((batch, index) => {
+
+        let statusClass = "";
+
+        if (batch.status === "Planned") statusClass = "planned";
+        if (batch.status === "Cancelled") statusClass = "cancelled";
+
+        const row = document.createElement("tr");
+
+        const values = [
+            batch.id,
+            batch.product,
+            batch.rawMaterial,
+            batch.rawQuantity + " kg",
+            batch.productionQuantity + " kg",
+            batch.manufacturingDate
+        ];
+
+        values.forEach(value => {
+
+            const cell = document.createElement("td");
+
+            cell.textContent = value;
+
+            row.appendChild(cell);
+
+        });
+
+        const statusCell = document.createElement("td");
+
+        const badge = document.createElement("span");
+
+        badge.className = "status " + statusClass;
+
+        badge.textContent = batch.status;
+
+        statusCell.appendChild(badge);
+
+        row.appendChild(statusCell);
+
+        const actionCell = document.createElement("td");
+
+        const updateButton = document.createElement("button");
+
+        updateButton.className = "action update";
+
+        updateButton.textContent = "Update";
+
+        updateButton.addEventListener("click", () =>
+            updateStatus(index)
+        );
+
+        const deleteButton = document.createElement("button");
+
+        deleteButton.className = "action delete";
+
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () =>
+            deleteBatch(index)
+        );
+
+        actionCell.append(updateButton, deleteButton);
+
+        row.appendChild(actionCell);
+
+        table.appendChild(row);
+
+    });
+
+    updateDashboard();
+
+}
+
+// Save production batch
+document.getElementById("productionForm")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const batch = {
+
+        id: "BAT" + Date.now().toString().slice(-7),
+
+        product: document.getElementById("product").value,
+
+        rawMaterial: document.getElementById("rawMaterial").value.trim(),
+
+        rawQuantity: Number(
+            document.getElementById("rawQuantity").value
+        ),
+
+        productionQuantity: Number(
+            document.getElementById("productionQuantity").value
+        ),
+
+        manufacturingDate:
+            document.getElementById("manufacturingDate").value,
+
+        status: document.getElementById("batchStatus").value,
+
+        inventoryUpdated: false
+
+    };
+
+    if (
+        !batch.product ||
+        !batch.rawMaterial ||
+        !batch.manufacturingDate ||
+        batch.rawQuantity <= 0 ||
+        batch.productionQuantity <= 0
+    ) {
+
+        alert("Please fill in all fields with valid quantities.");
+
+        return;
+    }
+
+    // If created as Completed, update Inventory first
+    if (batch.status === "Completed") {
+
+        if (!updateInventory(batch)) {
+            return;
+        }
+
+    }
+
+    batches.push(batch);
+
+    try {
+
+        saveBatches();
+
+    } catch (error) {
+
+        alert("Unable to save production batch. Check browser storage.");
+
+        return;
+    }
+
+    renderBatches();
+
+    this.reset();
+
+    document.getElementById("manufacturingDate").value =
+        new Date().toLocaleDateString("en-CA");
+
+    loadRawMaterials();
+
+    alert("Production batch saved successfully!");
+
+});
+
+// Change production status
+function updateStatus(index) {
+
+    const batch = batches[index];
+
+    const statuses = [
+        "Planned",
+        "Ongoing",
+        "Completed",
+        "Cancelled"
+    ];
+
+    const currentIndex = statuses.indexOf(batch.status);
+
+    const nextStatus = statuses[
+        (currentIndex + 1) % statuses.length
+    ];
+
+    if (nextStatus === "Completed" && !batch.inventoryUpdated) {
+
+        if (!updateInventory(batch)) {
+            return;
+        }
+
+        alert("Production completed! Inventory has been updated.");
+
+    }
+
+    batch.status = nextStatus;
+
+    saveBatches();
+
+    renderBatches();
+
+}
+
+// Delete production batch
+function deleteBatch(index) {
+
+    if (confirm("Are you sure you want to delete this batch?")) {
+
+        batches.splice(index, 1);
+
+        saveBatches();
+
+        renderBatches();
+
+    }
+
+}
+
+// Set today's date
+document.getElementById("manufacturingDate").value =
+    new Date().toLocaleDateString("en-CA");
+
+// Load Inventory raw materials
+loadRawMaterials();
+
+// Refresh dropdown when returning to this tab
+window.addEventListener("focus", loadRawMaterials);
+
+// Display saved records
+renderBatches();
+
+</script>
+
+</body>
+</html>

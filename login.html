@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactoryFlow - Login</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f3f6f9;
+}
+
+.login-container {
+    width: 410px;
+    max-width: 92%;
+    background: white;
+    padding: 35px;
+    border-radius: 14px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-icon {
+    font-size: 38px;
+}
+
+.logo h1 {
+    color: #183b56;
+    font-size: 27px;
+    margin-top: 8px;
+}
+
+.logo p {
+    color: #777;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+h2 {
+    color: #183b56;
+    font-size: 21px;
+    margin-bottom: 22px;
+    text-align: center;
+}
+
+label {
+    display: block;
+    margin-bottom: 7px;
+    color: #333;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d5dce3;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    outline: none;
+    font-size: 14px;
+}
+
+input:focus, select:focus {
+    border-color: #2563eb;
+}
+
+button {
+    width: 100%;
+    padding: 13px;
+    background: #183b56;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+.message {
+    text-align: center;
+    color: #dc2626;
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.credentials {
+    background: #f3f6f9;
+    padding: 13px;
+    border-radius: 7px;
+    margin-top: 22px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.8;
+}
+
+.credentials strong {
+    color: #183b56;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="logo">
+        <div class="logo-icon">🏭</div>
+        <h1>FactoryFlow</h1>
+        <p>Manufacturing Management System</p>
+    </div>
+
+    <h2>Login to Your Account</h2>
+
+    <form id="loginForm">
+
+        <label>Username</label>
+        <input type="text" id="username"
+        placeholder="Enter username" required>
+
+        <label>Password</label>
+        <input type="password" id="password"
+        placeholder="Enter password" required>
+
+        <label>Select Role</label>
+        <select id="role" required>
+            <option value="">Select your role</option>
+            <option value="Salesman">Salesman</option>
+            <option value="Factory Admin">Factory Admin</option>
+            <option value="Production Supervisor">Production Supervisor</option>
+            <option value="Owner/Accountant">Owner / Accountant</option>
+        </select>
+
+        <button type="submit">Login</button>
+
+        <p class="message" id="message"></p>
+
+    </form>
+
+    <div class="credentials">
+        <strong>Sample Login Credentials</strong><br>
+        Salesman: sales / sales123<br>
+        Factory Admin: admin / admin123<br>
+        Production Supervisor: production / prod123<br>
+        Owner/Accountant: owner / owner123
+    </div>
+
+</div>
+
+<script>
+
+const users = [
+    {
+        username: "sales",
+        password: "sales123",
+        role: "Salesman"
+    },
+    {
+        username: "admin",
+        password: "admin123",
+        role: "Factory Admin"
+    },
+    {
+        username: "production",
+        password: "prod123",
+        role: "Production Supervisor"
+    },
+    {
+        username: "owner",
+        password: "owner123",
+        role: "Owner/Accountant"
+    }
+];
+
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value;
+
+    const user = users.find(u =>
+        u.username === username &&
+        u.password === password &&
+        u.role === role
+    );
+
+    if (user) {
+
+        localStorage.setItem("factoryflowCurrentUser", JSON.stringify({
+            username: user.username,
+            role: user.role
+        }));
+
+        window.location.href = "index.html";
+
+    } else {
+
+        document.getElementById("message").textContent =
+        "Invalid username, password or selected role.";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
